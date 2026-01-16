@@ -1,25 +1,28 @@
-const SHEET_ID = 'YOUR_SHEET_ID';
+function getSheetId() {
+  return PropertiesService
+    .getScriptProperties()
+    .getProperty('SHEET_ID');
+}
+
 
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
 
     const updateId = data.update_id;
-    const message = data.message?.text || '';
+    const message = data.message.text;
     const fecha = new Date();
 
-    if (!updateId) {
-      return ContentService.createTextOutput('ok');
-    }
+    const SHEET_ID = getSheetId();
 
-    if (yaProcesado(updateId)) {
-      return ContentService.createTextOutput('ok');
-    }
+    const sheet = SpreadsheetApp
+      .openById(SHEET_ID)
+      .getSheetByName('Registros');
 
-    guardar(updateId, message, fecha);
-    marcarProcesado(updateId);
+    sheet.appendRow([fecha, updateId, message]);
 
-    return ContentService.createTextOutput('ok');
+    
+
   } catch (err) {
     Logger.log(err);
     return ContentService.createTextOutput('ok');
